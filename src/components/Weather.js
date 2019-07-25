@@ -72,8 +72,10 @@ const Weather = () => {
   if (fetching) return <LinearProgress />;
 
   return (
-    <Chip
-      label={`Weather in ${locationName}: ${description} and ${temperatureinFahrenheit}°`}
-    />
+    temperatureinFahrenheit ?
+      <Chip
+        label={`Weather in ${locationName}: ${description} and ${temperatureinFahrenheit.toFixed(1)}°F`}
+      />
+      : null
   );
 };
