@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useQuery } from "urql";
 import gql from "graphql-tag";
 
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from "@material-ui/core/styles";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -16,7 +16,6 @@ import GraphMetrics from "./GraphMetrics/GraphMetrics";
 
 import * as actions from "../../store/actions";
 
-
 const queryMetrics = gql`
   query {
     getMetrics
@@ -25,27 +24,29 @@ const queryMetrics = gql`
 
 const useStyles = makeStyles(theme => ({
   root: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    display: "flex",
+    flexWrap: "wrap",
+    width: "100%",
+    marginTop: 30,
+    marginBottom: 30
   },
   formControl: {
     margin: theme.spacing(1),
-    width: 700
+    width: 700,
+    marginLeft: "auto",
+    marginRight: "10%"
   },
   select: {
     marginTop: 30
-  },
-  card: {
-    margin: '5% 10%'
   }
 }));
 
-const getMetrics = (state) => {
+const retrieveMetrics = state => {
   const { allMetrics, selectedMetrics } = state.metrics;
   return {
     ...state,
     allMetrics,
-    selectedMetrics,
+    selectedMetrics
   };
 };
 
@@ -53,7 +54,7 @@ const Dashboard = () => {
   const classes = useStyles();
   const [lastMetricSelected, setLastMetricSelected] = useState("");
   const [result] = useQuery({
-    query: queryMetrics,
+    query: queryMetrics
   });
   const dispatch = useDispatch();
 
@@ -66,17 +67,15 @@ const Dashboard = () => {
     if (!data || fetching) return;
     const { getMetrics } = data;
     dispatch({ type: actions.METRICS_RECEIVED, getMetrics });
-  },
-    [fetching, dispatch, data, error]
-  );
+  }, [fetching, dispatch, data, error]);
 
-  const { allMetrics, selectedMetrics } = useSelector(getMetrics);
+  const { allMetrics, selectedMetrics } = useSelector(retrieveMetrics);
 
-  const handleMetricDeselected = (metricDeselected) => {
+  const handleMetricDeselected = metricDeselected => {
     dispatch({ type: actions.METRIC_DESELECTED, metricDeselected });
   };
 
-  const handleMetricSelected = (metricSelected) => {
+  const handleMetricSelected = metricSelected => {
     dispatch({ type: actions.METRIC_SELECTED, metricSelected });
     setLastMetricSelected(metricSelected[metricSelected.length - 1]);
   };
@@ -85,39 +84,46 @@ const Dashboard = () => {
 
   return (
     <React.Fragment>
-      {data ?
+      {data ? (
         <form className={classes.root}>
           <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="select-multiple-chip">Select Metric</InputLabel>
+            {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+            <InputLabel htmlFor="select-multiple-chip">
+              Select Metric
+            </InputLabel>
             <Select
               multiple
               className={classes.select}
               value={selectedMetrics}
-              onChange={(event) => handleMetricSelected(event.target.value)}
+              onChange={event => handleMetricSelected(event.target.value)}
               input={<Input id="select-multiple-chip" />}
               renderValue={selected => (
                 <div>
                   {selected.map(value => (
-                    <Chip key={value} label={value} onDelete={() => handleMetricDeselected(value)} />
+                    <Chip
+                      key={value}
+                      label={value}
+                      onDelete={() => handleMetricDeselected(value)}
+                    />
                   ))}
                 </div>
               )}
-            // MenuProps={MenuProps}
+              // MenuProps={MenuProps}
             >
               {allMetrics.map(metric => {
                 if (!selectedMetrics.includes(metric)) {
                   return (
-                    <MenuItem key={metric} value={metric} >
+                    <MenuItem key={metric} value={metric}>
                       {metric}
                     </MenuItem>
-                  )
+                  );
                 }
-                return null
+                return null;
               })}
             </Select>
           </FormControl>
         </form>
-        : null}
+      ) : null}
       <GraphMetrics lastMetricSelected={lastMetricSelected} />
     </React.Fragment>
   );

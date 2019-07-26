@@ -19,6 +19,7 @@ export default () => {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" color="inherit" className={classes.grow}>
+          {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
           {name} EOG React Visualization Assessment
         </Typography>
         <Weather />

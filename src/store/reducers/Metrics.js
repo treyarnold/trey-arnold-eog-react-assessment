@@ -3,24 +3,25 @@ import * as actions from "../actions";
 const initialState = {
   allMetrics: [],
   selectedMetrics: [],
-  measurements: {},
+  measurements: {}
 };
 
 const metricsRecevied = (state, action) => {
   const measurements = {};
-  if(action.getMetrics.length) {
+  if (action.getMetrics.length) {
     action.getMetrics.map(metric => {
       measurements[metric] = {
         name: metric,
         columns: ["time", "value", "unit"],
-        points: [],
-      }
-    })
+        points: []
+      };
+      return null;
+    });
   }
   return {
     ...state,
     measurements,
-    allMetrics: action.getMetrics,
+    allMetrics: action.getMetrics
   };
 };
 
@@ -32,10 +33,13 @@ const metricSelected = (state, action) => {
 };
 
 const metricDeselected = (state, action) => {
-  const newSelectedMetrics = {...state};
-  newSelectedMetrics.selectedMetrics.splice(newSelectedMetrics.selectedMetrics.indexOf(action.metricDeselected), 1);
+  const newSelectedMetrics = { ...state };
+  newSelectedMetrics.selectedMetrics.splice(
+    newSelectedMetrics.selectedMetrics.indexOf(action.metricDeselected),
+    1
+  );
   return {
-    ...newSelectedMetrics,
+    ...newSelectedMetrics
   };
 };
 
@@ -56,7 +60,7 @@ const handlers = {
   [actions.METRICS_RECEIVED]: metricsRecevied,
   [actions.METRIC_SELECTED]: metricSelected,
   [actions.METRIC_DESELECTED]: metricDeselected,
-  [actions.SELECTED_MEASUREMENTS]: selectedMeasurements,
+  [actions.SELECTED_MEASUREMENTS]: selectedMeasurements
 };
 
 export default (state = initialState, action) => {

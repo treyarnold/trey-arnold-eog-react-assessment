@@ -8,6 +8,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+// eslint-disable-next-line react/prop-types
 export default ({ children }) => {
   const classes = useStyles();
   return <div className={classes.wrapper}>{children}</div>;

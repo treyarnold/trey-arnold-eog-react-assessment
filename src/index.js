@@ -1,18 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { Provider, createClient } from "urql";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import { Provider, createClient } from 'urql';
 
 const client = createClient({
-  url: 'https://react.eogresources.com/graphql',
+  url: "https://react.eogresources.com/graphql"
 });
 
 ReactDOM.render(
   <Provider value={client}>
     <App />
-  </Provider>
-  , document.getElementById("root"));
+  </Provider>,
+  // eslint-disable-next-line no-undef
+  document.getElementById("root")
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
