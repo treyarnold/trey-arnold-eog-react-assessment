@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [result] = useQuery({
     query: queryMetrics,
   });
+  const dispatch = useDispatch();
 
   const { fetching, data, error } = result;
   useEffect(() => {
@@ -51,7 +52,6 @@ const Dashboard = () => {
     [fetching, dispatch, data, error]
   );
 
-  const dispatch = useDispatch();
   const { allMetrics, selectedMetrics } = useSelector(getMetrics);
 
   const handleMetricDeselected = (metricDeselected) => {

@@ -40,7 +40,6 @@ const metricDeselected = (state, action) => {
 };
 
 const selectedMeasurements = (state, action) => {
-  console.log(action);
   return {
     ...state,
     measurements: {

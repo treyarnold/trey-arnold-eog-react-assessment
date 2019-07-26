@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+// import getHeartbeat from "./Heartbeat";
 
 import { useQuery } from "urql";
 import gql from "graphql-tag";
@@ -18,6 +19,12 @@ const getMeasurementsQuery = gql`
   }      
   `;
 
+const getHeartbeat = gql`
+  query {
+    heartBeat
+  }
+`;
+
 const getMetrics = (state) => {
   const { allMetrics, selectedMetrics } = state.metrics;
   return {
@@ -26,14 +33,27 @@ const getMetrics = (state) => {
   };
 };
 
-
-const GraphMetrics = ({lastMetricSelected}) => {
+const GraphMetrics = ({ lastMetricSelected }) => {
+  const [heartBeat, setHeartBeat] = useState();
   const dispatch = useDispatch();
   const { allMetrics, selectedMetrics } = useSelector(getMetrics);
-  
+  const heartBeats = useQuery({
+    query: getHeartbeat
+  })[0].data;
+
+  useEffect(()=> {
+    if (heartBeats) {
+      setHeartBeat(heartBeats.heartBeat)
+    }
+  }, [heartBeats])
+
   const [result] = useQuery({
     query: getMeasurementsQuery,
-    variables: { metric: `${lastMetricSelected}` }
+    variables: {
+      metric: `${lastMetricSelected}`,
+      before: heartBeat,
+      after: heartBeat - 180000, 
+    }
   });
 
   const { fetching, data, error } = result;
@@ -45,12 +65,12 @@ const GraphMetrics = ({lastMetricSelected}) => {
     }
     if (!data || fetching) return;
     const { getMeasurements } = data;
-    dispatch({ type: actions.SELECTED_MEASUREMENTS, getMeasurements , lastMetricSelected});
+    dispatch({ type: actions.SELECTED_MEASUREMENTS, getMeasurements, lastMetricSelected });
   },
     [fetching, dispatch, data, error]
   );
 
-  
+
 
   // allMetrics.map((metric) => {
   //   const getMeasurementsQuery = gql`
