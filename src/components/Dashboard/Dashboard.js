@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import { useQuery } from "urql";
 import gql from "graphql-tag";
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Chip from '@material-ui/core/Chip';
+
+import Input from "@material-ui/core/Input";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import Chip from "@material-ui/core/Chip";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
 import GraphMetrics from "./GraphMetrics/GraphMetrics";
@@ -31,7 +31,6 @@ const getMetrics = (state) => {
 };
 
 const Dashboard = () => {
-  // const [selectedMetrics, setSelectedMetrics] = useState([]);
   const [result] = useQuery({
     query: queryMetrics,
   });
@@ -45,7 +44,7 @@ const Dashboard = () => {
     }
     if (!data || fetching) return;
     const { getMetrics } = data;
-    dispatch({ type: actions.METRICS_RECEIVED, getMetrics })
+    dispatch({ type: actions.METRICS_RECEIVED, getMetrics });
   },
     [dispatch, data, error]
   );

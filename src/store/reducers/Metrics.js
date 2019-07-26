@@ -7,8 +7,20 @@ const initialState = {
 };
 
 const metricsRecevied = (state, action) => {
+  console.log(action.getMetrics);
+  const measurements = {};
+  if(action.getMetrics.length) {
+    action.getMetrics.map(metric => {
+      measurements[metric] = {
+        name: metric,
+        columns: ["time", "value", "unit"],
+        points: [],
+      }
+    })
+  }
   return {
     ...state,
+    measurements,
     allMetrics: action.getMetrics,
   };
 };
