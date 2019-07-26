@@ -7,7 +7,6 @@ const initialState = {
 };
 
 const metricsRecevied = (state, action) => {
-  console.log(action.getMetrics);
   const measurements = {};
   if(action.getMetrics.length) {
     action.getMetrics.map(metric => {
@@ -29,7 +28,7 @@ const metricSelected = (state, action) => {
   return {
     ...state,
     selectedMetrics: action.metricSelected
-  }
+  };
 };
 
 const metricDeselected = (state, action) => {
@@ -37,13 +36,28 @@ const metricDeselected = (state, action) => {
   newSelectedMetrics.selectedMetrics.splice(newSelectedMetrics.selectedMetrics.indexOf(action.metricDeselected), 1);
   return {
     ...newSelectedMetrics,
-  }
-}
+  };
+};
+
+const selectedMeasurements = (state, action) => {
+  console.log(action);
+  return {
+    ...state,
+    measurements: {
+      ...state.measurements,
+      [action.lastMetricSelected]: {
+        ...state.measurements[action.lastMetricSelected],
+        points: action.getMeasurements
+      }
+    }
+  };
+};
 
 const handlers = {
   [actions.METRICS_RECEIVED]: metricsRecevied,
   [actions.METRIC_SELECTED]: metricSelected,
   [actions.METRIC_DESELECTED]: metricDeselected,
+  [actions.SELECTED_MEASUREMENTS]: selectedMeasurements,
 };
 
 export default (state = initialState, action) => {

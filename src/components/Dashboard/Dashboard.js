@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useQuery } from "urql";
 import gql from "graphql-tag";
@@ -22,19 +22,21 @@ const queryMetrics = gql`
   }
 `;
 
+
 const getMetrics = (state) => {
   const { allMetrics, selectedMetrics } = state.metrics;
   return {
+    ...state,
     allMetrics,
     selectedMetrics,
   };
 };
 
 const Dashboard = () => {
+  const [lastMetricSelected, setLastMetricSelected] = useState("");
   const [result] = useQuery({
     query: queryMetrics,
   });
-  let metricSelector;
 
   const { fetching, data, error } = result;
   useEffect(() => {
@@ -46,21 +48,21 @@ const Dashboard = () => {
     const { getMetrics } = data;
     dispatch({ type: actions.METRICS_RECEIVED, getMetrics });
   },
-    [dispatch, data, error]
+    [fetching, dispatch, data, error]
   );
-
 
   const dispatch = useDispatch();
   const { allMetrics, selectedMetrics } = useSelector(getMetrics);
 
   const handleMetricDeselected = (metricDeselected) => {
-    dispatch({ type: actions.METRIC_DESELECTED, metricDeselected })
-
+    dispatch({ type: actions.METRIC_DESELECTED, metricDeselected });
   };
 
   const handleMetricSelected = (metricSelected) => {
-    dispatch({ type: actions.METRIC_SELECTED, metricSelected })
+    dispatch({ type: actions.METRIC_SELECTED, metricSelected });
+    setLastMetricSelected(metricSelected[metricSelected.length - 1]);
   };
+
   if (fetching) return <LinearProgress />;
 
   return (
@@ -94,9 +96,8 @@ const Dashboard = () => {
             })}
           </Select>
         </FormControl>
-        : <p>An error had occured</p>}
-      {metricSelector}
-      <GraphMetrics metrics={selectedMetrics} />
+        : null}
+      <GraphMetrics lastMetricSelected={lastMetricSelected}/>
     </React.Fragment>
   );
 };
