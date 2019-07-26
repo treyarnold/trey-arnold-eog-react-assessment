@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useQuery } from "urql";
 import gql from "graphql-tag";
 
+import { makeStyles } from '@material-ui/core/styles';
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -22,6 +23,22 @@ const queryMetrics = gql`
   }
 `;
 
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    width: 700
+  },
+  select: {
+    marginTop: 30
+  },
+  card: {
+    margin: '5% 10%'
+  }
+}));
 
 const getMetrics = (state) => {
   const { allMetrics, selectedMetrics } = state.metrics;
@@ -33,6 +50,7 @@ const getMetrics = (state) => {
 };
 
 const Dashboard = () => {
+  const classes = useStyles();
   const [lastMetricSelected, setLastMetricSelected] = useState("");
   const [result] = useQuery({
     query: queryMetrics,
@@ -68,36 +86,39 @@ const Dashboard = () => {
   return (
     <React.Fragment>
       {data ?
-        <FormControl>
-          <InputLabel htmlFor="select-multiple-chip">Chip</InputLabel>
-          <Select
-            multiple
-            value={selectedMetrics}
-            onChange={(event) => handleMetricSelected(event.target.value)}
-            input={<Input id="select-multiple-chip" />}
-            renderValue={selected => (
-              <div>
-                {selected.map(value => (
-                  <Chip key={value} label={value} onDelete={() => handleMetricDeselected(value)} />
-                ))}
-              </div>
-            )}
-          // MenuProps={MenuProps}
-          >
-            {allMetrics.map(metric => {
-              if (!selectedMetrics.includes(metric)) {
-                return (
-                  <MenuItem key={metric} value={metric} >
-                    {metric}
-                  </MenuItem>
-                )
-              }
-              return null
-            })}
-          </Select>
-        </FormControl>
+        <form className={classes.root}>
+          <FormControl className={classes.formControl}>
+            <InputLabel htmlFor="select-multiple-chip">Select Metric</InputLabel>
+            <Select
+              multiple
+              className={classes.select}
+              value={selectedMetrics}
+              onChange={(event) => handleMetricSelected(event.target.value)}
+              input={<Input id="select-multiple-chip" />}
+              renderValue={selected => (
+                <div>
+                  {selected.map(value => (
+                    <Chip key={value} label={value} onDelete={() => handleMetricDeselected(value)} />
+                  ))}
+                </div>
+              )}
+            // MenuProps={MenuProps}
+            >
+              {allMetrics.map(metric => {
+                if (!selectedMetrics.includes(metric)) {
+                  return (
+                    <MenuItem key={metric} value={metric} >
+                      {metric}
+                    </MenuItem>
+                  )
+                }
+                return null
+              })}
+            </Select>
+          </FormControl>
+        </form>
         : null}
-      <GraphMetrics lastMetricSelected={lastMetricSelected}/>
+      <GraphMetrics lastMetricSelected={lastMetricSelected} />
     </React.Fragment>
   );
 };

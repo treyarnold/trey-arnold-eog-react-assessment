@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import getHeartbeat from "./Heartbeat";
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 
 import { useQuery } from "urql";
 import gql from "graphql-tag";
@@ -8,16 +8,16 @@ import gql from "graphql-tag";
 import * as actions from "../../../store/actions";
 
 const getMeasurementsQuery = gql`
-  query ($metric: String!) {
+  query ($metric: String!, $before: Timestamp, $after: Timestamp) {
     getMeasurements(input: {metricName: $metric,
-    before: 1564112276618, after: 1564112096618}) {   
+    before: $before, after: $after}) {   
       metric
       value
       unit
       at
     }
   }      
-  `;
+`;
 
 const getHeartbeat = gql`
   query {
@@ -26,9 +26,9 @@ const getHeartbeat = gql`
 `;
 
 const getMetrics = (state) => {
-  const { allMetrics, selectedMetrics } = state.metrics;
+  const { measurements, selectedMetrics } = state.metrics;
   return {
-    allMetrics,
+    measurements,
     selectedMetrics,
   };
 };
@@ -36,12 +36,13 @@ const getMetrics = (state) => {
 const GraphMetrics = ({ lastMetricSelected }) => {
   const [heartBeat, setHeartBeat] = useState();
   const dispatch = useDispatch();
-  const { allMetrics, selectedMetrics } = useSelector(getMetrics);
+  const { measurements, selectedMetrics } = useSelector(getMetrics);
+  const [chartData, setChartData] = useState();
   const heartBeats = useQuery({
     query: getHeartbeat
   })[0].data;
 
-  useEffect(()=> {
+  useEffect(() => {
     if (heartBeats) {
       setHeartBeat(heartBeats.heartBeat)
     }
@@ -52,7 +53,7 @@ const GraphMetrics = ({ lastMetricSelected }) => {
     variables: {
       metric: `${lastMetricSelected}`,
       before: heartBeat,
-      after: heartBeat - 180000, 
+      after: heartBeat - 1800000,
     }
   });
 
@@ -70,49 +71,38 @@ const GraphMetrics = ({ lastMetricSelected }) => {
     [fetching, dispatch, data, error]
   );
 
+  useEffect(() => {
+    if (measurements[selectedMetrics[0]] && measurements[selectedMetrics[0]].points.length) {
+      const newChartData = [];
+      const arraySize = measurements[selectedMetrics[0]].points.length;
+      for (let i = 0; i < arraySize; i++) {
+        const timestamp = new Date(measurements[selectedMetrics[0]].points[i].at);
+        const dataPoint = {
+          at: timestamp.toString().substring(15,24)
+        };
+        selectedMetrics.map((metric) => {
+          dataPoint[metric] = measurements[metric].points[i].value;
+        });
+        newChartData.push(dataPoint);
+      }
+      setChartData(newChartData);
+    }
+  }, [measurements]);
 
-
-  // allMetrics.map((metric) => {
-  //   const getMeasurementsQuery = gql`
-  //       query {
-  //         getMeasurements(input: {metricName: "${metric}",
-  //         before: 1564112276618, after: 1564112096618}) {   
-  //           value
-  //           unit
-  //           at
-  //         }
-  //       }      
-  //     `;
-  //     const [result] = useQuery({
-  //       query: getMeasurementsQuery,
-  //     });
-  //     const { fetching, data, error } = result;
-  //     if (error) {
-  //       dispatch({ type: actions.API_ERROR, error: error.message });
-  //       return;
-  //     }
-  //     if (!data || fetching) return;
-  //     console.log(metric, data);
-  //     // dispatch({ type: actions.MEASURMENT_RECEIVED, getMetrics });
-  // });
-  // useEffect(() => {
-  //   // const { getMetrics } = data;
-  // },
-  //   [dispatch, data, error]
-  // );
-
-
-  // console.log("res.data", res.data);
-  // if (res.data && props.metrics.length) {
-  //   if (res.data.getLastKnownMeasurement) console.log(res.data.getLastKnownMeasurement.metric, res.data.getLastKnownMeasurement.value);
-  // }
-
-  // let test = () => (<h3>Select a metric</h3>);
-  // if (props.metrics) test = props.metrics.map(metric => (<h3>{metric}</h3>))
-  // console.log(props.metrics)
   return (
-    // props.metrics.length ? props.metrics.map(metric => (<h3>{metric}</h3>)) : <h3>Select a metric</h3>
-    null
+    chartData ?
+      <ResponsiveContainer width="80%" height="60%">
+        <LineChart data={chartData}>
+          {selectedMetrics.map((metric, idx) => (
+            <Line key={idx} type="monotone" dataKey={metric} />
+          ))}
+          <CartesianGrid stroke="#ccc" />
+          <XAxis dataKey="at" />
+          <YAxis />
+          <Tooltip />
+        </LineChart>
+      </ResponsiveContainer>
+      : null
   )
 }
 
